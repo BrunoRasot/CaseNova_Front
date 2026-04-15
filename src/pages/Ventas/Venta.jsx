@@ -145,13 +145,6 @@ export default function NuevaVenta() {
     p.modelo_celular.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  const getImageUrl = (imagenPath) => {
-    if (!imagenPath) return null;
-    if (imagenPath.startsWith('http') || imagenPath.startsWith('data:')) return imagenPath;
-    const baseUrl = api.defaults.baseURL.replace('/api', '');
-    return `${baseUrl}${imagenPath}`;
-  };
-
   return (
     <div className="relative flex min-h-[calc(100dvh-150px)] flex-col gap-4 overflow-visible animate-in fade-in duration-300 font-sans selection:bg-black selection:text-white 2xl:h-[calc(100vh-140px)] 2xl:flex-row 2xl:overflow-hidden">
       <FeedbackToast toast={toast} onClose={() => setToast(null)} />
@@ -188,11 +181,13 @@ export default function NuevaVenta() {
                 className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md flex flex-col"
               >
                 <div className="relative flex h-48 w-full items-center justify-center border-b border-slate-100 bg-gradient-to-b from-slate-50 to-slate-100">
-                  {prod.imagen ? (
+                  {/* AQUÍ ESTÁ EL CAMBIO PRINCIPAL PARA CLOUDINARY */}
+                  {prod.imagen_url ? (
                     <img
-                      src={getImageUrl(prod.imagen)}
+                      src={prod.imagen_url}
                       alt={prod.nombre}
                       className="max-h-full max-w-full object-contain p-4 transition duration-300 group-hover:scale-[1.02]"
+                      onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Error'; }}
                     />
                   ) : (
                     <ImageIcon size={32} className="text-slate-300" />

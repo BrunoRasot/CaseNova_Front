@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Loader2, X, Boxes, Upload, Image as ImageIcon, Edit2, Trash2 } from 'lucide-react';
-import api from '../../api/apiClient';
-import ConfirmDialog from '../../components/ConfirmDialog';
+import api from '../../api/apiClient'; // Ajusta esta ruta si es diferente en tu proyecto
+import ConfirmDialog from '../../components/ConfirmDialog'; // Ajusta esta ruta si es diferente
 
 const initialForm = {
   nombre: '',
@@ -53,12 +53,6 @@ export default function Productos() {
 
   const getTotalStock = () => productos.reduce((acc, p) => acc + Number(p.stock || 0), 0);
   const getStockCritico = () => productos.filter((p) => Number(p.stock) < 5).length;
-  const getImageUrl = (imagenPath) => {
-    if (!imagenPath) return null;
-    if (imagenPath.startsWith('http') || imagenPath.startsWith('data:')) return imagenPath;
-    const baseUrl = api.defaults.baseURL.replace('/api', '');
-    return `${baseUrl}${imagenPath}`;
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -112,7 +106,8 @@ export default function Productos() {
       color: prod.color || '',
       imagen: null
     });
-    setImagePreview(prod.imagen ? prod.imagen : null);
+    // ¡CORREGIDO!: Usa imagen_url de la DB
+    setImagePreview(prod.imagen_url ? prod.imagen_url : null);
     setShowModal(true);
   };
 
@@ -247,13 +242,16 @@ export default function Productos() {
           {filtrados.map((prod) => (
             <div key={prod.id} className="group overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
               <div className="relative flex h-44 w-full items-center justify-center border-b border-slate-100 bg-gradient-to-b from-slate-50 to-slate-100">
-                {prod.imagen ? (
+                {/* ¡CORREGIDO!: Usa imagen_url directamente */}
+                {prod.imagen_url ? (
                   <img 
-                    src={getImageUrl(prod.imagen)}
+                    src={prod.imagen_url}
                     alt={prod.nombre}
                     className="max-h-full max-w-full object-contain p-3 transition duration-300 group-hover:scale-[1.02]"
                     onError={(e) => {
                       console.error('Error loading image:', e.target.src);
+                      // Opcional: puedes poner una imagen de fallback aquí si falla la carga
+                      e.target.src = 'https://via.placeholder.com/150?text=Error'; 
                     }}
                   />
                 ) : (
@@ -344,7 +342,8 @@ export default function Productos() {
                     <label htmlFor="imagen-input" className="cursor-pointer">
                       {imagePreview ? (
                         <div className="flex flex-col items-center gap-3">
-                          <img src={getImageUrl(imagePreview)} alt="Preview" className="h-24 w-24 rounded-lg object-cover border border-slate-200" />
+                          {/* ¡CORREGIDO!: Usa imagePreview directamente en el src */}
+                          <img src={imagePreview} alt="Preview" className="h-24 w-24 rounded-lg object-cover border border-slate-200" />
                           <p className="text-xs text-slate-600">Click para cambiar imagen</p>
                         </div>
                       ) : (
