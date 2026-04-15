@@ -2,9 +2,10 @@ import axios from 'axios';
 import useAuthStore from '../store/useAuthStore';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://casenova-back.onrender.com/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   withCredentials: true
 });
+
 
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
@@ -21,15 +22,10 @@ api.interceptors.response.use(
     const shouldTryRefresh =
       error.response?.status === 401 &&
       !originalRequest?._retry &&
-      originalRequest?.url !== '/auth/refresh' &&
-      originalRequest?.url !== '/auth/logout' &&
-      originalRequest?.url !== '/auth/login' &&
-      originalRequest?.url !== '/auth/register' &&
-      (originalRequest?.headers?.Authorization || useAuthStore.getState().token);
+      !['/auth/refresh', '/auth/login', '/auth/logout'].some(url => originalRequest?.url.includes(url));
 
     if (shouldTryRefresh) {
       originalRequest._retry = true;
-
       try {
         const { data } = await axios.post(
           `${api.defaults.baseURL}/auth/refresh`,
@@ -44,17 +40,13 @@ api.interceptors.response.use(
         }
       } catch (_) {
         useAuthStore.getState().setLogout();
-        if (currentPath !== '/login') {
-          window.location.replace('/login');
-        }
+        if (currentPath !== '/login') window.location.replace('/login');
       }
     }
 
     if (error.response?.status === 401) {
       useAuthStore.getState().setLogout();
-      if (currentPath !== '/login') {
-        window.location.replace('/login');
-      }
+      if (currentPath !== '/login') window.location.replace('/login');
     }
 
     return Promise.reject(error);
